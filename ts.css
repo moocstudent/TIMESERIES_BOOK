@@ -1,0 +1,897 @@
+/* =============================================================
+   crypto.css — styles for the live business sandboxes (viz.jsx)
+   Loaded after styles.css; leans on the same design tokens.
+============================================================= */
+
+/* ---------- shared demo stage ---------- */
+.ts-stage {
+  position: relative;
+  min-height: 120px;
+  padding: 22px 20px;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+.ts-select {
+  font: 500 13px var(--f-mono);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+}
+.ts-code {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+  font-family: var(--f-mono);
+}
+.ts-minibtn { padding: 4px 10px !important; font-size: 12px !important; }
+
+/* ---------- generic data table ---------- */
+.ts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--bg);
+}
+.ts-table th, .ts-table td {
+  border: 1px solid var(--hairline-strong);
+  padding: 6px 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+.ts-table th {
+  font: 600 11px var(--f-mono);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: var(--surface-2);
+  text-align: right;
+}
+.ts-table th:first-child, .ts-table td:first-child { text-align: left; }
+.ts-table td.neg { color: var(--accent); font-weight: 600; }
+.ts-table td.pos { color: var(--primary); font-weight: 600; }
+.ts-table tr.hl td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.ts-table td.lbl { color: var(--muted); }
+
+/* ---------- document-flow cards ---------- */
+.ts-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.ts-doc {
+  min-width: 150px;
+  flex: 1;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 10px 12px;
+  opacity: 0.45;
+  transition: opacity 0.3s, border-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+.ts-doc.on { opacity: 1; border-color: var(--ink); }
+.ts-doc.now { opacity: 1; border-color: var(--accent); box-shadow: 0 4px 16px -8px rgba(0,0,0,0.35); }
+.ts-doc .d-code { font: 600 10px var(--f-mono); letter-spacing: 0.12em; color: var(--muted); }
+.ts-doc .d-name { font: 600 14px var(--f-body); margin-top: 4px; }
+.ts-doc .d-sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+.ts-flow-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: 16px;
+  flex: none;
+}
+.ts-doc-detail {
+  margin-top: 14px;
+  border: 1px solid var(--hairline-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 14px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.ts-doc-detail .fields { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0; }
+.ts-doc-detail .fields span { font: 500 12px var(--f-mono); background: var(--surface-2); border: 1px solid var(--hairline); border-radius: 4px; padding: 2px 8px; }
+.ts-posting {
+  margin-top: 8px;
+  font: 500 12.5px var(--f-mono);
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border: 1px dashed var(--hairline-strong);
+  white-space: pre-line;
+}
+
+/* ---------- swimlanes ---------- */
+.ts-lanes { display: flex; flex-direction: column; gap: 6px; min-width: 560px; }
+.ts-lane { display: grid; grid-template-columns: 92px 1fr; gap: 8px; align-items: stretch; }
+.ts-lane .l-name {
+  display: flex; align-items: center; justify-content: center;
+  font: 600 11px var(--f-mono); letter-spacing: 0.08em;
+  color: var(--muted); background: var(--surface-2);
+  border: 1px solid var(--hairline); border-radius: var(--radius);
+  padding: 6px 4px; text-align: center;
+}
+.ts-lane .l-track { display: flex; gap: 6px; }
+.ts-lane .l-slot { flex: 1; min-height: 44px; border-radius: var(--radius); }
+.ts-lane .l-step {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 44px; padding: 4px 6px;
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: var(--bg); font-size: 12px; text-align: center; line-height: 1.3;
+  opacity: 0.4; transition: all 0.3s;
+}
+.ts-lane .l-step.on { opacity: 1; border-color: var(--ink); }
+.ts-lane .l-step.now { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+.ts-lane .l-step .s-no { font: 600 9.5px var(--f-mono); color: var(--muted); }
+
+/* ---------- trees (org / BOM / cost) ---------- */
+.ts-tree { font-size: 13.5px; line-height: 1.5; min-width: 380px; }
+.ts-tree .t-node { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: var(--radius); }
+.ts-tree .t-node:hover { background: var(--surface-2); }
+.ts-tree .t-kids { margin-left: 18px; padding-left: 14px; border-left: 1px dashed var(--hairline-strong); }
+.ts-tag {
+  font: 600 10px var(--f-mono); letter-spacing: 0.06em;
+  padding: 2px 7px; border-radius: 4px;
+  border: 1px solid var(--hairline-strong); color: var(--muted); background: var(--surface-2);
+}
+.ts-tag.acc { color: var(--accent); border-color: var(--accent); background: transparent; }
+.ts-tag.pri { color: var(--primary); border-color: var(--primary); background: transparent; }
+.ts-qty { font: 600 12.5px var(--f-mono); }
+
+/* ---------- tabs (material master) ---------- */
+.ts-tabs { display: flex; gap: 0; flex-wrap: wrap; border-bottom: 1px solid var(--ink); }
+.ts-tab {
+  padding: 8px 16px; font: 600 13px var(--f-body);
+  border: 1px solid transparent; border-bottom: none;
+  cursor: pointer; color: var(--muted); border-radius: var(--radius) var(--radius) 0 0;
+}
+.ts-tab.on { color: var(--ink); border-color: var(--ink); background: var(--bg); position: relative; top: 1px; }
+.ts-tabpane { border: 1px solid var(--ink); border-top: none; background: var(--bg); padding: 16px 18px; }
+.ts-kv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; font-size: 13px; }
+.ts-kv .k { color: var(--muted); font: 500 11.5px var(--f-mono); letter-spacing: 0.04em; }
+.ts-kv .pair { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dotted var(--hairline-strong); padding: 4px 0; }
+@media (max-width: 640px) { .ts-kv { grid-template-columns: 1fr; } }
+
+/* ---------- T-accounts ---------- */
+.ts-taccounts { display: flex; flex-wrap: wrap; gap: 16px; }
+.ts-tacc { min-width: 190px; flex: 1; }
+.ts-tacc .t-title { text-align: center; font: 600 12.5px var(--f-body); border-bottom: 2px solid var(--ink); padding-bottom: 4px; }
+.ts-tacc .t-body { display: grid; grid-template-columns: 1fr 1fr; font: 500 12.5px var(--f-mono); }
+.ts-tacc .t-dr { border-right: 1px solid var(--ink); padding: 6px 8px; text-align: right; }
+.ts-tacc .t-cr { padding: 6px 8px; text-align: right; }
+.ts-tacc .t-head { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-align: center !important; }
+
+/* ---------- checklist (month-end / cutover) ---------- */
+.ts-check { display: flex; flex-direction: column; gap: 6px; }
+.ts-check .c-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 12px; border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: var(--bg); cursor: pointer; transition: all 0.25s;
+  font-size: 13.5px; line-height: 1.45;
+}
+.ts-check .c-item.done { opacity: 0.6; }
+.ts-check .c-item.done .c-name { text-decoration: line-through; }
+.ts-check .c-item.now { border-color: var(--accent); }
+.ts-check .c-box {
+  flex: none; width: 18px; height: 18px; margin-top: 1px;
+  border: 1.5px solid var(--ink); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.ts-check .c-item.done .c-box { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+.ts-check .c-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+/* ---------- bars & meters ---------- */
+.ts-bars { display: flex; flex-direction: column; gap: 10px; }
+.ts-bar-row { display: grid; grid-template-columns: 130px 1fr 70px; align-items: center; gap: 10px; font-size: 12.5px; }
+.ts-bar-row .b-track { height: 18px; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: 4px; overflow: hidden; }
+.ts-bar-row .b-fill { height: 100%; background: var(--primary); transition: width 0.35s; }
+.ts-bar-row .b-fill.acc { background: var(--accent); }
+.ts-bar-row .b-fill.warn { background: color-mix(in srgb, var(--accent) 55%, var(--surface-2)); }
+.ts-bar-row .b-val { font: 600 12px var(--f-mono); text-align: right; }
+
+/* ---------- canvas ---------- */
+.ts-canvas-wrap { background: var(--surface); border: 1px solid var(--hairline-strong); border-radius: var(--radius-lg); padding: 10px; }
+.ts-canvas-wrap canvas { display: block; width: 100%; height: auto; }
+
+/* ---------- pyramid ---------- */
+.ts-pyramid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ts-pyr-level {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid var(--ink); border-radius: var(--radius);
+  background: var(--bg); cursor: pointer; padding: 8px 10px;
+  font-size: 13px; text-align: center; line-height: 1.3; transition: all 0.25s;
+}
+.ts-pyr-level:hover { background: var(--surface-2); }
+.ts-pyr-level.on { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+.ts-pyr-level .p-en { font: italic 500 11px var(--f-display); opacity: 0.75; }
+
+/* ---------- quadrant map ---------- */
+.ts-quad {
+  position: relative; width: 100%; height: 340px;
+  background:
+    linear-gradient(var(--hairline-strong) 1px, transparent 1px) 0 50% / 100% 50.5% no-repeat,
+    linear-gradient(90deg, var(--hairline-strong) 1px, transparent 1px) 50% 0 / 50.5% 100% no-repeat,
+    var(--surface);
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius-lg);
+}
+.ts-quad .q-dot {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer; z-index: 1;
+}
+.ts-quad .q-dot .dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--primary); border: 2px solid var(--ink);
+  transition: transform 0.2s;
+}
+.ts-quad .q-dot.sel .dot { background: var(--accent); transform: scale(1.35); }
+.ts-quad .q-dot .nm { font: 600 11px var(--f-body); background: var(--bg); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--hairline); white-space: nowrap; }
+.ts-quad .q-axis { position: absolute; font: 600 9.5px var(--f-mono); letter-spacing: 0.1em; color: var(--muted); }
+
+/* ---------- misc ---------- */
+.ts-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.ts-legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: middle; border: 1px solid var(--ink); }
+.ts-btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ts-log {
+  margin-top: 12px; max-height: 180px; overflow-y: auto;
+  font: 500 12px var(--f-mono); line-height: 1.6;
+  background: var(--surface-2); border: 1px solid var(--hairline); border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.ts-note { margin-top: 10px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+/* ---------- role desk / day-in-life / SoD (E9) ---------- */
+.ts-role-head {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+  gap: 16px; margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--hairline-strong);
+}
+.ts-role-tabs { display: flex; flex-wrap: wrap; gap: 0; }
+.ts-kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+@media (max-width: 720px) { .ts-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.ts-kpi {
+  text-align: left; cursor: pointer;
+  padding: 14px 14px 12px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ts-kpi:hover { border-color: var(--ink); }
+.ts-kpi.sel { border-color: var(--accent); box-shadow: 0 4px 16px -8px rgba(0,0,0,0.3); }
+.ts-kpi .k-label { font: 600 11px var(--f-mono); letter-spacing: 0.08em; color: var(--muted); }
+.ts-kpi .k-val {
+  font: 500 28px var(--f-display); font-style: italic; margin-top: 8px; line-height: 1.1;
+  color: var(--ink);
+}
+.ts-kpi.acc .k-val { color: var(--accent); }
+.ts-kpi.warn .k-val { color: color-mix(in srgb, var(--accent) 70%, var(--ink)); }
+.ts-kpi.ok .k-val { color: var(--primary); }
+.ts-kpi .k-unit { font-size: 14px; margin-left: 4px; font-style: normal; opacity: 0.7; }
+.ts-kpi .k-hint { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
+.ts-day-rail {
+  display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px;
+}
+.ts-day-node {
+  flex: 1; min-width: 72px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 8px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg); opacity: 0.45;
+  transition: all 0.25s;
+}
+.ts-day-node.on { opacity: 0.85; border-color: var(--ink); }
+.ts-day-node.now { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+.ts-day-node .t { font: 600 12px var(--f-mono); }
+.ts-day-node .doc { font: 600 10px var(--f-mono); letter-spacing: 0.08em; color: var(--muted); }
+
+.ts-sod-actions {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.ts-sod-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+  font-size: 12.5px; cursor: pointer; user-select: none;
+}
+.ts-sod-chip.on { border-color: var(--ink); background: var(--surface-2); }
+.ts-sod-chip .code { font: 600 10px var(--f-mono); letter-spacing: 0.08em; color: var(--muted); }
+.ts-sod-chip input { accent-color: var(--accent); }
+.ts-sod-wrap { overflow-x: auto; }
+.ts-sod-table { min-width: 520px; }
+.ts-sod-table td, .ts-sod-table th { text-align: center !important; min-width: 36px; }
+.ts-sod-table td:first-child, .ts-sod-table th:first-child { text-align: left !important; }
+
+/* ---------- 3D shells (E10) ---------- */
+.ts-3d-shell {
+  position: relative;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+}
+.ts-3d-canvas { width: 100%; min-height: 320px; touch-action: none; }
+.ts-3d-canvas canvas { display: block; width: 100% !important; height: auto !important; cursor: grab; }
+.ts-3d-canvas canvas:active { cursor: grabbing; }
+.ts-3d-legend {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 10px 12px; border-top: 1px solid var(--hairline);
+  background: var(--bg);
+}
+.ts-3d-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border: 1px solid var(--hairline-strong);
+  border-radius: 999px; background: var(--surface-2);
+  font: 600 12px var(--f-body); color: var(--ink-soft);
+  cursor: pointer;
+}
+.ts-3d-chip i {
+  width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+}
+.ts-3d-chip.on {
+  border-color: var(--accent); color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+}
+.ts-3d-chip.done { opacity: 0.75; border-color: var(--primary); }
+.ts-3d-hint {
+  margin-left: auto; font: 500 11px var(--f-mono);
+  letter-spacing: 0.06em; color: var(--muted);
+}
+
+/* ---------- E2E progress board ---------- */
+.ts-e2e-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.ts-e2e-overall {
+  display: flex; flex-direction: column; align-items: flex-end;
+  padding: 8px 14px; border: 1px solid var(--ink); border-radius: var(--radius);
+}
+.ts-e2e-overall strong {
+  font: italic 500 36px var(--f-display); line-height: 1; color: var(--accent);
+}
+.ts-e2e-timeline {
+  display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 4px;
+}
+.ts-e2e-node {
+  flex: 1; min-width: 88px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 10px 8px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg); opacity: 0.45;
+  text-align: center; transition: all 0.2s;
+}
+.ts-e2e-node.on { opacity: 0.9; border-color: var(--ink); }
+.ts-e2e-node.now { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+.ts-e2e-node .n { font: 600 10px var(--f-mono); color: var(--muted); letter-spacing: 0.08em; }
+.ts-e2e-node .l { font-size: 12px; line-height: 1.3; }
+.ts-e2e-lanes { display: flex; flex-direction: column; gap: 10px; }
+.ts-e2e-lane {
+  padding: 12px 14px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+}
+.ts-e2e-lane.wait { border-color: var(--accent); }
+.ts-e2e-lane .lane-meta {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 6px; font-size: 14px;
+}
+.ts-e2e-lane .lane-track {
+  height: 10px; border-radius: 4px; background: var(--surface-2);
+  border: 1px solid var(--hairline); overflow: hidden;
+}
+.ts-e2e-lane .lane-fill {
+  height: 100%; background: var(--primary); transition: width 0.4s;
+}
+.ts-e2e-lane.wait .lane-fill { background: var(--accent); }
+.ts-e2e-lane .lane-doc {
+  margin-top: 8px; font-size: 12px; color: var(--muted);
+}
+.ts-e2e-lane .lane-tip {
+  margin-top: 4px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.45;
+}
+.ts-e2e-lane .lane-flag {
+  margin-top: 8px; display: inline-block;
+  font: 600 10px var(--f-mono); letter-spacing: 0.08em;
+  color: var(--accent); border: 1px solid var(--accent);
+  padding: 2px 8px; border-radius: 4px;
+}
+
+/* ---------- factory hardware (E11) ---------- */
+.ts-hw-zones { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ts-hw-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.ts-hw-card {
+  text-align: left; cursor: pointer;
+  padding: 12px 12px 10px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+  display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ts-hw-card:hover { border-color: var(--ink); }
+.ts-hw-card.sel {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px -8px rgba(0,0,0,0.3);
+}
+.ts-hw-card .code { font-size: 10px; letter-spacing: 0.1em; color: var(--muted); }
+.ts-hw-card strong { font-size: 13.5px; line-height: 1.3; }
+.ts-hw-card .zone { font-size: 10px; color: var(--muted); }
+.ts-hw-kv { display: grid; gap: 8px; margin-top: 10px; font-size: 13.5px; }
+.ts-hw-kv .k {
+  display: block; font: 600 10.5px var(--f-mono); letter-spacing: 0.08em;
+  color: var(--muted); margin-bottom: 2px;
+}
+
+.ts-andon {
+  display: grid; grid-template-columns: 90px 1fr; gap: 20px; align-items: center;
+}
+@media (max-width: 640px) { .ts-andon { grid-template-columns: 1fr; } }
+.ts-andon-tower {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.ts-andon-lamp {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid var(--ink); transition: background 0.25s, box-shadow 0.25s;
+}
+.ts-andon-pole {
+  width: 10px; height: 56px; background: var(--ink); border-radius: 2px; opacity: 0.35;
+}
+.ts-andon-panel {
+  border: 2px solid var(--hairline-strong); border-radius: var(--radius-lg);
+  padding: 16px 18px; background: var(--bg);
+}
+.ts-andon-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-top: 14px;
+}
+.ts-andon-stats .k {
+  display: block; font: 600 10px var(--f-mono); letter-spacing: 0.1em; color: var(--muted);
+}
+.ts-andon-stats strong { font-size: 18px; }
+.ts-andon-stats .u { margin-left: 4px; font-size: 11px; color: var(--muted); }
+
+.ts-scan-pipe {
+  display: flex; align-items: stretch; gap: 0; overflow-x: auto;
+  margin-bottom: 14px; padding: 4px 0;
+}
+.ts-scan-steps { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---------- protocol stack (HW4) ---------- */
+.ts-proto-stack {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ts-proto-layer {
+  text-align: left; cursor: pointer; width: 100%;
+  padding: 12px 14px 8px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+  opacity: 0.55; transition: all 0.25s; position: relative;
+}
+.ts-proto-layer.on { opacity: 0.9; border-color: var(--ink); }
+.ts-proto-layer.now {
+  opacity: 1; border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  box-shadow: 0 4px 16px -8px rgba(0,0,0,0.25);
+}
+.ts-proto-layer .pl-title {
+  font: 600 14px var(--f-body); color: var(--ink);
+}
+.ts-proto-layer .pl-proto {
+  margin-top: 4px; font-size: 12px; color: var(--muted); letter-spacing: 0.04em;
+}
+.ts-proto-layer .pl-pipe {
+  text-align: center; color: var(--muted); font-size: 14px; margin-top: 4px; height: 14px;
+}
+.ts-proto-legend {
+  margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.45;
+  padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--surface-2);
+}
+
+/* ---------- SVG topology / flowchart ---------- */
+.ts-topo-wrap {
+  width: 100%; overflow: hidden; border: 1px solid var(--hairline);
+  border-radius: var(--radius); background:
+    linear-gradient(165deg,
+      color-mix(in srgb, var(--surface-2) 88%, var(--accent) 12%),
+      var(--bg));
+}
+.ts-topo-svg, .ts-flow-svg, .ts-mini-topo {
+  display: block; width: 100%; height: auto;
+  color: var(--muted);
+}
+.ts-topo-zone.field {
+  fill: color-mix(in srgb, #6b7c5e 14%, transparent);
+  stroke: color-mix(in srgb, #6b7c5e 45%, var(--hairline));
+  stroke-width: 1;
+}
+.ts-topo-zone.it {
+  fill: color-mix(in srgb, var(--accent) 10%, transparent);
+  stroke: color-mix(in srgb, var(--accent) 40%, var(--hairline));
+  stroke-width: 1;
+}
+.ts-topo-zone-lab, .ts-topo-title {
+  fill: var(--muted); font: 600 11px var(--f-body); letter-spacing: 0.04em;
+}
+.ts-topo-title { font-size: 12px; fill: var(--ink); }
+.ts-topo-bus {
+  stroke: #6b7c5e; stroke-width: 3; stroke-linecap: round; opacity: 0.45;
+  transition: opacity 0.25s, stroke 0.25s;
+}
+.ts-topo-bus.hot { opacity: 1; stroke: var(--accent); }
+.ts-topo-edge {
+  stroke: var(--hairline-strong); stroke-width: 1.6; fill: none;
+  opacity: 0.35; transition: all 0.25s;
+}
+.ts-topo-edge.on { opacity: 0.75; stroke: var(--ink); }
+.ts-topo-edge.hot { opacity: 1; stroke: var(--accent); stroke-width: 2.4; }
+.ts-topo-edge-lab {
+  fill: var(--muted); font: 500 10px var(--f-mono, ui-monospace, monospace);
+}
+.ts-topo-node rect {
+  fill: var(--bg); stroke: var(--hairline-strong); stroke-width: 1.2;
+  transition: all 0.25s;
+}
+.ts-topo-node.on rect { stroke: var(--ink); opacity: 1; }
+.ts-topo-node.hot rect {
+  stroke: var(--accent); stroke-width: 2;
+  fill: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--accent) 35%, transparent));
+}
+.ts-topo-node-t {
+  fill: var(--ink); font: 600 11px var(--f-body);
+}
+.ts-topo-node-s {
+  fill: var(--muted); font: 500 9px var(--f-mono, ui-monospace, monospace);
+}
+.ts-topo-pkt {
+  fill: var(--accent);
+  animation: ts-pkt-pulse 1.2s ease-in-out infinite;
+}
+@keyframes ts-pkt-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+.ts-flow-box rect {
+  fill: var(--bg); stroke: var(--hairline-strong); stroke-width: 1.2;
+}
+.ts-flow-box.on rect { stroke: var(--ink); }
+.ts-flow-box.now rect {
+  stroke: var(--accent); stroke-width: 2;
+  fill: color-mix(in srgb, var(--accent) 10%, var(--bg));
+}
+.ts-flow-box .t1 {
+  fill: var(--ink); font: 600 11px var(--f-body);
+}
+.ts-flow-box .t2 {
+  fill: var(--muted); font: 500 9px var(--f-mono, ui-monospace, monospace);
+}
+.ts-flow-link {
+  stroke: var(--hairline-strong); stroke-width: 1.6; opacity: 0.4;
+}
+.ts-flow-link.on { stroke: var(--accent); opacity: 1; }
+.ts-mini-topo { min-height: 100px; }
+
+/* =============================================================
+   crypto extras — primitives specific to the on-chain labs
+============================================================= */
+
+/* monospace + generic pills */
+.ts-mono { font-family: var(--f-mono); }
+.ts-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.ts-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 600 11px var(--f-mono); letter-spacing: 0.04em;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--hairline-strong); color: var(--ink-soft);
+  background: var(--surface-2); cursor: default;
+}
+.ts-pill.on { border-color: var(--accent); color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, var(--bg)); }
+.ts-pill.pri { border-color: var(--primary); color: var(--primary); background: transparent; }
+.ts-pill.click { cursor: pointer; }
+
+/* hash / address readout box */
+.ts-hashbox {
+  font: 500 13px var(--f-mono);
+  word-break: break-all; line-height: 1.7;
+  padding: 12px 14px; border-radius: var(--radius);
+  background: var(--surface-2); border: 1px solid var(--hairline);
+  border-left: 3px solid var(--primary);
+}
+.ts-hashbox.acc { border-left-color: var(--accent); }
+.ts-hashbox .hx { color: var(--muted); }
+.ts-hashbox .hh { color: var(--primary); font-weight: 600; }
+.ts-flash { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--ink); border-radius: 2px; }
+.ts-addr { font: 500 12.5px var(--f-mono); color: var(--ink-soft); word-break: break-all; }
+
+.ts-label { font: 600 10.5px var(--f-mono); letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px; }
+.ts-big { font: italic 500 34px var(--f-display); line-height: 1; color: var(--ink); }
+.ts-big.acc { color: var(--accent); }
+.ts-big.pri { color: var(--primary); }
+.ts-big .u { font: 500 14px var(--f-body); font-style: normal; color: var(--muted); margin-left: 4px; }
+
+.ts-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ts-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.ts-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 640px) { .ts-grid2, .ts-grid3, .ts-grid4 { grid-template-columns: 1fr 1fr; } }
+
+.ts-cell {
+  padding: 12px 14px; border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); background: var(--bg);
+}
+.ts-cell.warn { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--bg)); }
+.ts-cell.ok   { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 6%, var(--bg)); }
+
+/* block cards for a chain */
+.ts-blocks { display: flex; gap: 0; overflow-x: auto; padding: 4px 0; align-items: stretch; }
+.ts-block {
+  min-width: 168px; flex: 1;
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: var(--bg); padding: 12px 13px; cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.ts-block.now { border-color: var(--accent); box-shadow: 0 4px 16px -8px rgba(0,0,0,0.35); }
+.ts-block.bad { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+.ts-block.good { border-color: var(--primary); }
+.ts-block .bk { font: 600 10px var(--f-mono); letter-spacing: 0.1em; color: var(--muted); }
+.ts-block .bh { font: 500 11px var(--f-mono); color: var(--primary); word-break: break-all; margin-top: 4px; line-height: 1.5; }
+.ts-block.bad .bh { color: var(--accent); }
+.ts-block-arrow { display: flex; align-items: center; padding: 0 5px; color: var(--muted); font-size: 15px; flex: none; }
+
+/* order book */
+.ts-ob { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; font: 500 12.5px var(--f-mono); }
+.ts-ob .side-h { font: 600 10px var(--f-mono); letter-spacing: 0.1em; color: var(--muted); padding-bottom: 4px; border-bottom: 1px solid var(--hairline-strong); }
+.ts-ob-row { position: relative; display: flex; justify-content: space-between; padding: 2px 6px; border-radius: 2px; }
+.ts-ob-row .depth { position: absolute; top: 0; bottom: 0; border-radius: 2px; z-index: 0; }
+.ts-ob-row .bid-depth { right: 0; background: color-mix(in srgb, var(--primary) 16%, transparent); }
+.ts-ob-row .ask-depth { left: 0; background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.ts-ob-row span { position: relative; z-index: 1; }
+.ts-ob-row.fill { outline: 1.5px solid var(--accent); }
+.ts-ob-px.bid { color: var(--primary); }
+.ts-ob-px.ask { color: var(--accent); }
+
+/* svg charts (amm curve, supply, etc.) */
+.ts-svg { display: block; width: 100%; height: auto; background: var(--surface); border: 1px solid var(--hairline-strong); border-radius: var(--radius-lg); }
+.ts-svg .axis { stroke: var(--hairline-strong); stroke-width: 1; }
+.ts-svg .grid { stroke: var(--hairline); stroke-width: 1; }
+.ts-svg .curve { fill: none; stroke: var(--primary); stroke-width: 2; }
+.ts-svg .curve.acc { stroke: var(--accent); }
+.ts-svg .dot { fill: var(--accent); stroke: var(--bg); stroke-width: 2; }
+.ts-svg .lab { fill: var(--muted); font: 500 10px var(--f-mono); }
+.ts-svg .area { fill: color-mix(in srgb, var(--primary) 12%, transparent); stroke: none; }
+
+/* step list (attack traces, tx pipeline) */
+.ts-steps { display: flex; flex-direction: column; gap: 6px; }
+.ts-step {
+  display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start;
+  padding: 9px 12px; border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: var(--bg); font-size: 13px; line-height: 1.5; opacity: 0.5; transition: all 0.25s;
+}
+.ts-step.on { opacity: 1; border-color: var(--ink); }
+.ts-step.now { opacity: 1; border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, var(--bg)); }
+.ts-step.bad.now { border-color: var(--accent); }
+.ts-step .sn { font: 600 11px var(--f-mono); color: var(--muted); text-align: center; }
+.ts-step .sd { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+/* balance / ledger rows */
+.ts-ledger { display: flex; flex-direction: column; gap: 4px; }
+.ts-ledger-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  padding: 8px 12px; border: 1px solid var(--hairline); border-radius: var(--radius);
+  background: var(--bg); font-size: 13.5px;
+}
+.ts-ledger-row .who { font: 500 13px var(--f-mono); }
+.ts-ledger-row .amt { font: 600 14px var(--f-mono); }
+.ts-ledger-row .amt.up { color: var(--primary); }
+.ts-ledger-row .amt.down { color: var(--accent); }
+
+/* health / meter bar (reused idea, crypto naming) */
+.ts-meter { height: 12px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--hairline); overflow: hidden; }
+.ts-meter .fill { height: 100%; transition: width 0.35s, background 0.35s; }
+
+/* seg control local alias */
+.ts-seg { display: inline-flex; border: 1px solid var(--ink); border-radius: 1px; overflow: hidden; flex-wrap: wrap; }
+.ts-seg button { font: 500 11px var(--f-mono); letter-spacing: 0.04em; padding: 6px 12px; border: 0; border-right: 1px solid var(--hairline); background: transparent; color: var(--muted); cursor: pointer; }
+.ts-seg button:last-child { border-right: 0; }
+.ts-seg button.on { background: var(--ink); color: var(--bg); }
+
+/* text inputs used inside labs */
+.ts-input {
+  width: 100%; box-sizing: border-box;
+  font: 500 13px var(--f-mono); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); padding: 8px 10px; resize: vertical;
+}
+.ts-input:focus { outline: none; border-color: var(--accent); }
+.ts-input.mini { padding: 4px 6px; font-size: 12px; margin-top: 4px; }
+.ts-select {
+  font: 500 13px var(--f-mono); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius); padding: 4px 8px;
+}
+.viz-ctrl textarea.ts-input { min-width: 200px; }
+
+/* ---- LLM_BOOK additions ---- */
+.ts-pill.mini { font-size: 11px; padding: 3px 7px; }
+.ts-pill.warn { border-color: color-mix(in srgb, var(--accent) 60%, var(--hairline)); color: var(--accent); }
+.ts-bar-row .b-fill.mut { background: var(--hairline-strong); }
+.ts-bar-row .b-fill.ok { background: var(--primary); }
+.ts-matrix { width: 100%; border-collapse: collapse; font: 500 11px var(--f-mono); margin-top: 8px; }
+.ts-matrix th, .ts-matrix td { border: 1px solid var(--hairline); padding: 6px 8px; text-align: center; }
+.ts-matrix th { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.ts-matrix td.rowh { text-align: left; color: var(--ink); }
+.ts-matrix td.on { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--ink); font-weight: 600; }
+.ts-matrix td.click { cursor: pointer; }
+.ts-stack { display: flex; height: 26px; border: 1px solid var(--ink); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+.ts-stack > div { display: flex; align-items: center; justify-content: center; font: 500 10px var(--f-mono); color: var(--bg); overflow: hidden; white-space: nowrap; transition: width 0.35s; }
+
+/* ---------- AIE_BOOK additions ---------- */
+div.ts-flow-box {
+  min-width: 118px; flex: 1;
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: var(--bg); padding: 10px 12px; text-align: left;
+}
+div.ts-flow-box.on { border-color: var(--accent); }
+.ts-block.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--bg));
+  box-shadow: 0 4px 16px -10px rgba(0,0,0,0.35);
+}
+.ts-check-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; flex: none;
+  font: 600 11px var(--f-mono);
+  border: 1px solid var(--hairline-strong); border-radius: 3px;
+  background: var(--surface-2); color: var(--accent-ink);
+}
+.ts-block.on .ts-check-box { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ts-radar { display: block; width: 100%; max-width: 460px; margin: 0 auto; }
+.ts-radar .grid { stroke: var(--hairline-strong); fill: none; }
+.ts-radar .lab { font: 500 9.5px var(--f-mono); fill: var(--muted); }
+.ts-scoregrid { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; }
+.ts-scorerow { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  padding: 7px 10px; border: 1px solid var(--hairline); border-radius: var(--radius); background: var(--bg); font-size: 13px; }
+.ts-scorerow.weak { border-color: var(--accent); }
+.ts-wf { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.ts-wf-row { display: grid; grid-template-columns: 132px 1fr 82px; gap: 10px; align-items: center; font-size: 12.5px; }
+.ts-wf-track { height: 20px; background: var(--surface-2); border: 1px solid var(--hairline); border-radius: 3px; position: relative; overflow: hidden; }
+.ts-wf-seg { position: absolute; top: 0; bottom: 0; }
+/* =============================================================
+   Lecture figures (@fig markers in content/*.md)
+   Static, theme-aware SVG diagrams rendered inline between
+   the markdown paragraphs of the "解释 / explanation" notes.
+   ========================================================= */
+.ts-fig { margin: 26px 0 26px; }
+.ts-fig-svg {
+  display: block; width: 100%; height: auto;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-lg);
+}
+.ts-fig figcaption {
+  margin-top: 9px; padding-left: 10px;
+  border-left: 2px solid var(--accent);
+  font: 400 12.5px/1.6 var(--f-body); color: var(--muted);
+}
+.ts-fig figcaption .fno {
+  font: 600 11px var(--f-mono); color: var(--ink);
+  letter-spacing: 0.06em; margin-right: 7px;
+}
+
+/* text roles inside a figure */
+.ts-fig-svg .tt { fill: var(--ink);   font: 600 13px var(--f-body); }
+.ts-fig-svg .t  { fill: var(--ink);   font: 500 12px var(--f-body); }
+.ts-fig-svg .ts { fill: var(--ink-soft); font: 400 11px var(--f-body); }
+.ts-fig-svg .tn { fill: var(--muted); font: 400 10px var(--f-mono); }
+.ts-fig-svg .tm { fill: var(--muted); font: 500 11px var(--f-mono); }
+.ts-fig-svg .tk { fill: var(--ink);   font: 600 11px var(--f-mono); }
+.ts-fig-svg .ta { fill: var(--accent); font: 600 11px var(--f-mono); }
+.ts-fig-svg .tp { fill: var(--primary); font: 600 11px var(--f-mono); }
+
+/* boxes: default / primary / accent / muted / dashed ghost */
+.ts-fig-svg .bx   { fill: var(--bg); stroke: var(--hairline-strong); stroke-width: 1; }
+.ts-fig-svg .bx.p { fill: color-mix(in srgb, var(--primary) 13%, var(--bg)); stroke: var(--primary); }
+.ts-fig-svg .bx.a { fill: color-mix(in srgb, var(--accent) 13%, var(--bg));  stroke: var(--accent); }
+.ts-fig-svg .bx.m { fill: var(--surface); stroke: var(--hairline); }
+.ts-fig-svg .bx.g { fill: none; stroke: var(--hairline-strong); stroke-dasharray: 4 3; }
+
+/* strokes */
+.ts-fig-svg .ln   { stroke: var(--muted); stroke-width: 1.25; fill: none; }
+.ts-fig-svg .ln.a { stroke: var(--accent); }
+.ts-fig-svg .ln.p { stroke: var(--primary); }
+.ts-fig-svg .ln.f { stroke: var(--hairline-strong); }
+.ts-fig-svg .ln.d { stroke-dasharray: 4 3; }
+.ts-fig-svg .grid { stroke: var(--hairline); stroke-width: 1; }
+.ts-fig-svg .axis { stroke: var(--hairline-strong); stroke-width: 1; }
+.ts-fig-svg .cv   { fill: none; stroke: var(--primary); stroke-width: 2; }
+.ts-fig-svg .cv.a { stroke: var(--accent); }
+.ts-fig-svg .cv.m { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+
+/* fills */
+.ts-fig-svg .fp { fill: var(--primary); }
+.ts-fig-svg .fa { fill: var(--accent); }
+.ts-fig-svg .fm { fill: var(--hairline-strong); }
+.ts-fig-svg .fs { fill: var(--surface); }
+.ts-fig-svg .fmid { fill: var(--muted); }
+.ts-fig-svg .fdim { fill: var(--ink-soft); }
+.ts-fig-svg .fb { fill: var(--bg); }
+.ts-fig-svg .areap { fill: color-mix(in srgb, var(--primary) 14%, transparent); stroke: none; }
+.ts-fig-svg .areaa { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: none; }
+
+@media (max-width: 720px) {
+  .ts-fig { margin: 20px 0; }
+  .ts-fig figcaption { font-size: 12px; }
+}
+
+/* ============================================================
+   Code lab — the "one job, three languages" panel (pr chapters)
+   ============================================================ */
+:root {
+  --syn-cm: #8a8578;
+  --syn-st: #1f6f4a;
+  --syn-kw: #8a3fa0;
+  --syn-nu: #b5580a;
+}
+html[data-theme="dark"] {
+  --syn-cm: #6f6a5e;
+  --syn-st: #7bd88f;
+  --syn-kw: #c792ea;
+  --syn-nu: #ffab70;
+}
+.ts-code-lab { margin-top: 10px; }
+.ts-code-lab .cl-head {
+  display: flex; align-items: flex-end; gap: 0;
+  border-bottom: 1px solid var(--ink); flex-wrap: wrap;
+}
+.ts-code-lab .cl-file {
+  margin-left: auto; padding: 0 4px 8px;
+  font: 500 11px var(--f-mono); color: var(--muted); letter-spacing: 0.04em;
+}
+.ts-code-lab .cl-copy {
+  padding: 4px 10px; margin: 0 0 6px 10px;
+  font: 600 10.5px var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase;
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius);
+  background: transparent; color: var(--muted); cursor: pointer;
+}
+.ts-code-lab .cl-copy:hover { border-color: var(--ink); color: var(--ink); }
+.ts-code-lab .cl-copy.done { border-color: var(--primary); color: var(--primary); }
+.ts-code-lab pre {
+  margin: 0; padding: 16px 18px; overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--ink); border-top: none;
+  font: 500 12.5px/1.7 var(--f-mono); color: var(--ink-soft);
+  tab-size: 4;
+}
+.ts-code-lab pre .cm { color: var(--syn-cm); font-style: italic; }
+.ts-code-lab pre .st { color: var(--syn-st); }
+.ts-code-lab pre .kw { color: var(--syn-kw); font-weight: 600; }
+.ts-code-lab pre .nu { color: var(--syn-nu); }
+.ts-code-lab .cl-note {
+  margin-top: 10px; font-size: 13px; color: var(--ink-soft); line-height: 1.65;
+  border-left: 2px solid var(--accent); padding-left: 12px;
+}
+.ts-code-lab .cl-run {
+  margin-top: 8px; font: 500 11.5px var(--f-mono); color: var(--muted);
+  background: var(--surface); border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius); padding: 8px 10px; overflow-x: auto; white-space: pre;
+}
+
+/* small captions inside benches (SpringCloud additions) */
+.ts-cap{ font: 500 11px var(--f-mono, monospace); color: var(--muted); letter-spacing:.02em; margin: 2px 0 4px; }
+.ts-viz{ margin-top: 2px; }

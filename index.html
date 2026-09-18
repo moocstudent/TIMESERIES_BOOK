@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hans" data-lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>工业时序模型训练 · 从一条传感器曲线到一个跑在厂里的模型 · signals &amp; forecasts</title>
+<meta name="description" content="中英双语的「工业时序模型训练」自学教程,面向要真的把预测模型训出来、并让它在厂里活下去的人:把一条工业曲线的四层结构(基线 / 工况 / 环境 / 噪声)、采样周期与历史库压缩、缺失与停机的分类清洗、重采样与外部变量对齐、时序数据泄漏、滞后与滚动特征、递归与直接多步、ARIMA 残差诊断、梯度提升与早停、分位数回归与 pinball loss、全局模型与冷启动、深度模型的容量与数据量、PatchTST/N-BEATS/DLinear、时序基础模型的零样本与微调、显存估算、以及最现实的一章——在哪儿训(先量一量要不要 GPU、Kaggle 的 30 小时配额与 9 小时会话墙怎么靠检查点跨过去、十个平台按成本/可达性/长跑能力/数据合规排序、一次实验计划要花多少钱多少天)、滚动原点回测、指标陷阱、超参搜索与可复现、推理时刻表与降级路径、漂移与再训练、告警阈值与信任,全部放进同一套框架里。全书以一座工厂的电力负荷为贯穿例子,但方法适用于能耗、温度、振动、流量、产量与质量。每章先在「时序台」上把一个真实场景跑一遍,再读「解释」,最后看 Python / 数据与配置 / 训练与部署 三种视角的真实代码。A bilingual course on training industrial time-series models — data engineering, features, trees, deep models, foundation models, where to actually train them, backtesting, metrics, and operations — every chapter opens with a live bench whose numbers are computed in your browser and closes with code meant to run." />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>
+
+<link rel="stylesheet" href="styles.css?v=6" />
+<link rel="stylesheet" href="ts.css?v=6" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel (pinned) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+
+  <!-- App scripts (order matters: viz.jsx defines the shared helpers that
+       viz2/3/4 and figures*.jsx reuse; viz4.jsx defines the VIZ registry and
+       <Viz>; figures3.jsx defines <Figure> and figures4.jsx adds the per-module
+       architecture diagrams; code.jsx defines <CodeLab>. ?v is bumped each
+       release to bust the Babel cache. -->
+  <script type="text/babel" src="i18n.jsx?v=6"></script>
+  <script type="text/babel" src="data.jsx?v=6"></script>
+  <script type="text/babel" src="viz.jsx?v=6"></script>
+  <script type="text/babel" src="viz2.jsx?v=6"></script>
+  <script type="text/babel" src="viz3.jsx?v=6"></script>
+  <script type="text/babel" src="viz4.jsx?v=6"></script>
+  <script type="text/babel" src="figures.jsx?v=6"></script>
+  <script type="text/babel" src="figures2.jsx?v=6"></script>
+  <script type="text/babel" src="figures3.jsx?v=6"></script>
+  <script type="text/babel" src="figures4.jsx?v=6"></script>
+  <script type="text/babel" src="code.jsx?v=6"></script>
+  <script type="text/babel" src="code2.jsx?v=6"></script>
+  <script type="text/babel" src="pages.jsx?v=6"></script>
+  <script type="text/babel" src="app.jsx?v=6"></script>
+</body>
+</html>
