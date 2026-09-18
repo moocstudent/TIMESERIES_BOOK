@@ -310,6 +310,58 @@ FIGN["t30-plan"] = function ({ idx }) {
   );
 };
 
+/* ---------------- t31 · two persistence models ---------------- */
+FIGN["t31-colab"] = function ({ idx }) {
+  const L = useL();
+  const N = 44;
+  // expected wall time against checkpoint interval: the U from the bench
+  const u = Array.from({ length: N }, (_, i) => {
+    const tau = 4 + i * 6, C = 3, M = 333, lam = 1 / M;
+    return 12 * (1 + C / tau + lam * tau / 2) + 0.35;
+  });
+  const optI = u.indexOf(Math.min(...u));
+  return (
+    <FigFrame idx={idx} h={250} cap={L("两种持久化模型正好相反,而这个差别决定了训练脚本怎么写。Kaggle 的墙是确定的:9 小时到点回收,/kaggle/working 被保存,推成数据集版本就能接着跑,你可以排出一张时间表。Colab 没有承诺:运行时随时可能被抢占,/content 连同全部中间产物一起消失,只有挂载的 Drive 活下来——于是「切成几段」变成了「多久存一次盘」,而它有闭式最优解 √(2·C·M)。右下那条 U 形曲线的两端同样糟:存得太勤,时间全花在写盘上;存得太稀,每次回收都白跑一大段。", "The two persistence models are inverted, and that difference decides how the training script is written. Kaggle's wall is deterministic: reclaimed at nine hours with /kaggle/working preserved, so publishing a dataset version resumes the run and you can draw a schedule. Colab promises nothing: the runtime may be preempted at any moment and /content vanishes with every intermediate artefact, leaving only a mounted Drive — so how many segments becomes how often to save, a question with the closed form √(2·C·M). Both ends of the U are equally bad: save too often and the time goes into writing, save too rarely and every reclaim throws away a long stretch.")}>
+      <FT x={24} y={20} anchor="start" cls="tk">{L("Kaggle:确定的墙", "Kaggle: a deterministic wall")}</FT>
+      {[0, 1, 2].map((i) => (
+        <g key={i}>
+          <rect x={24 + i * 100} y={30} width={84} height={26} rx="4" fill={`color-mix(in srgb, ${FTONE.ok} 78%, transparent)`} />
+          <text x={66 + i * 100} y={47} textAnchor="middle" style={{ font: "600 10px var(--f-mono)", fill: "#fff" }}>9 h</text>
+          {i < 2 && <FT x={112 + i * 100} y={47} cls="tn">ckpt</FT>}
+        </g>
+      ))}
+      <FT x={24} y={74} anchor="start" cls="tn">{L("/kaggle/working 被保存 → 推成数据集版本 → 下次挂回来", "/kaggle/working is kept → dataset version → mounted back")}</FT>
+
+      <line x1={330} y1={14} x2={330} y2={96} stroke="var(--hairline-strong)" strokeDasharray="4 3" />
+
+      <FT x={348} y={20} anchor="start" cls="tk">{L("Colab:随机的抢占", "Colab: random preemption")}</FT>
+      {[0, 1, 2, 3].map((i) => {
+        const w = [70, 44, 96, 52][i];
+        let x = 348; for (let k = 0; k < i; k++) x += [70, 44, 96, 52][k] + 10;
+        return (
+          <g key={i}>
+            <rect x={x} y={30} width={w} height={26} rx="4" fill={`color-mix(in srgb, ${FTONE.warn} 76%, transparent)`} />
+            <text x={x + w / 2} y={47} textAnchor="middle" style={{ font: "600 9px var(--f-mono)", fill: "#fff" }}>✕</text>
+          </g>
+        );
+      })}
+      <FT x={348} y={74} anchor="start" cls="tn">{L("/content 全没了,只有挂载的 Drive 活下来", "/content is gone; only the mounted Drive survives")}</FT>
+
+      <line x1={24} y1={104} x2={648} y2={104} stroke="var(--hairline)" />
+
+      <FCurve vals={u} x={54} y={118} w={330} h={84} lo={13} hi={Math.max(...u) * 1.02} c={FTONE.p} />
+      <line x1={54 + (optI / (N - 1)) * 330} y1={114} x2={54 + (optI / (N - 1)) * 330} y2={202} stroke={FTONE.ok} strokeDasharray="4 3" />
+      <FT x={54 + (optI / (N - 1)) * 330} y={112} cls="tk">τ* = 45 min</FT>
+      <FAxis x={54} y={202} w={330} label={L("存得太勤", "too often")} right={L("存得太稀", "too rarely")} />
+      <FT x={46} y={126} anchor="end" cls="tn">{L("墙钟", "wall")}</FT>
+
+      <FBox x={404} y={118} w={244} h={40} label="τ* = √(2 · C · M)" sub={L("检查点耗时 × 平均无故障时间", "checkpoint cost x mean time to failure")} tone="ok" />
+      <FBox x={404} y={166} w={244} h={40} label={L("写 /content:一次抢占清零", "to /content: one reclaim, back to zero")} sub={L("12 h 的活变成 46 h", "12 h of work becomes 46 h")} tone="bad" />
+      <FT x={24} y={232} anchor="start" cls="ts">{L("免费档还有一条:关掉标签页训练就停,后台执行是付费功能", "One more on the free tier: close the tab and training stops — background execution is a paid feature")}</FT>
+    </FigFrame>
+  );
+};
+
 function Figure({ name, idx }) {
   const F = FIGN[name];
   if (!F) return null;

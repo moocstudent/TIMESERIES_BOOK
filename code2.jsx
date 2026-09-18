@@ -2574,3 +2574,197 @@ esac`,
     },
   ],
 };
+
+/* ============ PF3 · t31 — Colab in practice ============ */
+CODE.t31 = {
+  note: {
+    zh: "Colab 的训练脚本和 Kaggle 的不一样,因为持久化模型相反。Python 那栏是一个可以直接粘进 Notebook 的单元格:先确认真的分到了 GPU(免费档不保证),挂载 Drive,把数据集从 Drive 复制到本地盘再解开(这一步能省下大半的等待),然后按墙钟时间而不是按 epoch 写检查点——间隔由 Young 公式算出来。第二栏是运行时与暂存的配置,以及一张「什么存在哪里」的对照表。第三栏是打包与恢复的 shell,包括那条很多人不知道的:免费档关掉标签页训练就停。",
+    en: "A Colab training script differs from a Kaggle one because the persistence model is inverted. The Python tab is a cell you can paste straight into a notebook: confirm a GPU was actually allocated (the free tier does not promise one), mount Drive, copy the dataset from Drive to local disk and unpack it there (which removes most of the waiting), then checkpoint on a wall-clock interval rather than per epoch, with the interval computed from Young's formula. The second tab is the runtime and staging configuration plus a table of what lives where. The third is the packaging and recovery shell, including the one many people miss: on the free tier, closing the tab stops training.",
+  },
+  tabs: [
+    {
+      lang: "Python", k: "py", file: "colab_train.py",
+      run: "# 粘进 Colab 单元格;首次运行会要求授权挂载 Drive",
+      src: `"""A Colab cell that survives preemption. The differences from Kaggle are
+all about WHERE things live and HOW OFTEN you save."""
+import json
+import math
+import os
+import shutil
+import subprocess
+import time
+
+DRIVE = "/content/drive/MyDrive/tsbook"     # survives a reclaim
+LOCAL = "/content/data"                     # fast, and wiped every time
+CKPT = os.path.join(DRIVE, "ckpt", "state.pt")
+
+
+def check_gpu():
+    """The free tier does not promise a GPU. Find out before you wait an hour
+    for a CPU to do a job you planned for a T4."""
+    try:
+        out = subprocess.check_output(["nvidia-smi", "--query-gpu=name,memory.total",
+                                       "--format=csv,noheader"], text=True).strip()
+    except Exception:
+        raise SystemExit("no GPU allocated: Runtime > Change runtime type, or "
+                         "come back later. PF1 tells you whether you need one.")
+    print("GPU:", out)
+    return out
+
+
+def mount_drive():
+    from google.colab import drive
+    drive.mount("/content/drive")
+    os.makedirs(os.path.join(DRIVE, "ckpt"), exist_ok=True)
+
+
+def stage_data(archive="dataset.tar", dest=LOCAL):
+    """Read the archive ONCE off the Drive FUSE mount and unpack it locally.
+    Reading thousands of small files straight from Drive is one to two orders
+    of magnitude slower — this is where most Colab hours actually go."""
+    os.makedirs(dest, exist_ok=True)
+    src = os.path.join(DRIVE, archive)
+    t0 = time.time()
+    shutil.copy(src, "/content/dataset.tar")           # one big sequential read
+    shutil.unpack_archive("/content/dataset.tar", dest, format="tar")
+    print(f"staged in {time.time() - t0:.0f}s ->", dest)
+    return dest
+
+
+def young_interval(checkpoint_seconds, mtbf_hours):
+    """Young's formula for the optimal checkpoint interval on a machine that
+    fails at random: tau = sqrt(2 * C * M). Save more often and the time goes
+    into writing; less often and every reclaim throws away a long stretch."""
+    return math.sqrt(2 * checkpoint_seconds * mtbf_hours * 3600)
+
+
+def save(model, opt, epoch, step, best):
+    tmp = CKPT + ".tmp"
+    import torch
+    torch.save({"model": model.state_dict(), "opt": opt.state_dict(),
+                "epoch": epoch, "step": step, "best": best}, tmp)
+    os.replace(tmp, CKPT)                              # atomic, even onto Drive
+    json.dump({"epoch": epoch, "step": step, "best": best, "at": time.time()},
+              open(os.path.join(DRIVE, "ckpt", "manifest.json"), "w"))
+
+
+def load(model, opt):
+    import torch
+    if not os.path.exists(CKPT):
+        print("no checkpoint; starting from scratch")
+        return 0, 0, float("inf")
+    st = torch.load(CKPT, map_location="cpu")
+    model.load_state_dict(st["model"])
+    opt.load_state_dict(st["opt"])
+    print(f"resumed at epoch {st['epoch']} step {st['step']}")
+    return st["epoch"], st["step"], st["best"]
+
+
+def train(model, opt, loader, validate, epochs=40, ckpt_seconds=180, mtbf_hours=5.6):
+    epoch0, step0, best = load(model, opt)
+    tau = young_interval(ckpt_seconds, mtbf_hours)
+    print(f"checkpointing every {tau / 60:.0f} min (Young optimum)")
+    last, step = time.time(), step0
+    for epoch in range(epoch0, epochs):
+        for batch in loader:
+            train_step(model, opt, batch)
+            step += 1
+            # checkpoint on WALL CLOCK, not per epoch: an epoch may be far
+            # longer than the interval a preemptible machine justifies
+            if time.time() - last > tau:
+                save(model, opt, epoch, step, best)
+                last = time.time()
+                print(json.dumps({"epoch": epoch, "step": step, "saved": True}))
+        best = min(best, validate(model))
+        save(model, opt, epoch + 1, step, best)
+        last = time.time()
+    return best
+
+
+if __name__ == "__main__":
+    check_gpu()
+    mount_drive()
+    data_dir = stage_data()
+    print("ready. Free tier: keep this tab OPEN — closing it stops the runtime.")`,
+    },
+    {
+      lang: "数据与配置 / data", k: "yaml", file: "colab.yaml",
+      src: `# What lives where. Getting this table wrong is the whole chapter.
+paths:
+  /content:                 ephemeral      # wiped on every reclaim
+  /content/data:            ephemeral      # fast local disk - stage here
+  /content/drive/MyDrive:   persistent     # the ONLY thing that survives
+  /content/sample_data:     ephemeral      # Colab's own demo files
+
+runtime:
+  accelerator: T4           # not guaranteed on the free tier; check nvidia-smi
+  free_tier:
+    background_execution: false   # closing the tab stops training
+    idle_timeout_min: 90
+    max_session_h: 12             # best effort, often much less
+    quota: none_published
+  paid_tier:
+    background_execution: true
+    compute_units: metered
+
+staging:
+  # Drive's FUSE mount is 1-2 orders of magnitude slower than local disk on
+  # many small files. One sequential read of one archive is the fix.
+  method: tar_then_unpack_locally
+  archive: dataset.tar
+  measured_seconds:
+    many_small_files_from_drive: 720
+    one_tar_copied_and_unpacked: 120
+
+checkpointing:
+  target: /content/drive/MyDrive/tsbook/ckpt   # never /content
+  write_seconds: 180
+  observed_mtbf_hours: 5.6      # measure your own: log every reconnect
+  interval_minutes: 45          # = sqrt(2 * C * M), Young's formula
+  atomic_write: true
+
+reachability:
+  note: 从中国大陆访问 Colab 需要跨境网络;如果这不可行,PF4 列出了不需要出境的选项`,
+    },
+    {
+      lang: "训练与部署 / run", k: "sh", file: "colab_stage.sh",
+      run: "$ bash colab_stage.sh   # 在本地机器上跑,准备好再上传",
+      src: `#!/usr/bin/env bash
+# Run this on your OWN machine before touching Colab. The goal is that the
+# notebook does exactly one sequential read from Drive and nothing else.
+set -euo pipefail
+
+OUT=upload
+mkdir -p $OUT
+
+echo "[1/3] de-identify, then pack the dataset as ONE archive"
+python tools/deidentify.py --in data/line1.csv --out build/load.csv --scale-out
+tar -cf $OUT/dataset.tar -C build .
+ls -lh $OUT/dataset.tar
+
+echo "[2/3] why one archive and not a folder"
+python - <<'PY'
+files = 4200          # a typical per-day-per-tag parquet layout
+per_file_overhead_s = 0.17    # Drive FUSE round trip, measured
+print(f"{files} small files off the Drive mount: "
+      f"{files * per_file_overhead_s / 60:.0f} min per restart")
+print("one tar copied and unpacked locally:      about 2 min")
+print("and you pay that on EVERY reclaim, because /content is wiped")
+PY
+
+echo "[3/3] upload to Drive, then open the notebook"
+echo "  - drag $OUT/dataset.tar into Drive/tsbook/"
+echo "  - Runtime > Change runtime type > T4 GPU"
+echo "  - run the cell from colab_train.py"
+echo
+echo "Two things the free tier will not do for you:"
+echo "  1. guarantee a GPU  - check nvidia-smi first, every time"
+echo "  2. keep running with the tab closed - background execution is paid,"
+echo "     so a job you cannot babysit belongs on Kaggle (PF2) or a rented"
+echo "     card (PF4), not here"
+echo
+echo "Measure your own MTBF: append a line on every reconnect and read it back."
+echo '  date -u +%FT%TZ >> /content/drive/MyDrive/tsbook/reconnects.log'`,
+    },
+  ],
+};

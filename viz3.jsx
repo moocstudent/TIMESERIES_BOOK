@@ -334,8 +334,8 @@ function KaggleViz() {
         {R.impossible
           ? L(`没有检查点,一次需要 ${totalH} 小时的训练撞上 ${wall} 小时的会话墙,结果不是"慢一点",是永远跑不完——每次会话被回收,进度归零,你从头再来。这就是为什么 DL4 里那个"保存权重、优化器状态和 epoch 号"的循环在本地是可选项、在 Kaggle 上是必需品。把检查点打开。`,
               `Without checkpoints, a ${totalH}-hour job meeting a ${wall}-hour wall does not run slowly — it never finishes at all. Each session is reclaimed, progress returns to zero, and you start again. This is why the loop in DL4 that saves weights, optimiser state and the epoch number is optional locally and mandatory here. Switch checkpointing on.`)
-          : L(`写检查点(开销 ${ckptCost}%),这次训练被切成 ${R.sessions} 段、每段不超过 ${nf(R.perSession, 1)} 小时,跨 ${R.weeks} 周跑完。做法是固定的:训练循环把权重写进 /kaggle/working,跑完用 kaggle datasets version 把它推成一个新的数据集版本,下一个会话把这个数据集挂成输入、读出检查点接着训。${interactive ? `另外你现在是守在浏览器里跑的,每个会话大约白烧 0.8 小时配额在空转上,总共 ${nf(R.wasted, 1)} 小时——关掉它,改用 Save & Run All 后台提交,关掉浏览器去干别的。` : "并且你用的是 Save & Run All 后台提交,这是正确用法——交互会话会因为空闲被回收,还一直占着配额。"}如果这个任务超过 ${wall} 小时又不允许跨周,那么答案不在 Kaggle,而在下一章:花几十块钱租一张没有会话墙的卡。`,
-              `With checkpointing on (${ckptCost}% overhead) the run splits into ${R.sessions} segments of at most ${nf(R.perSession, 1)} hours and completes across ${R.weeks} weeks. The procedure is fixed: the training loop writes weights into /kaggle/working, you push that as a new dataset version with kaggle datasets version, and the next session mounts that dataset as an input, loads the checkpoint and continues. ${interactive ? `You are also sitting and watching it, burning roughly 0.8 hours of quota per session on idling — ${nf(R.wasted, 1)} hours in total. Turn that off, submit with Save & Run All instead, and close the browser.` : "You are submitting with Save & Run All, which is the correct usage — an interactive session is reclaimed when idle and holds your quota while you watch it."} If the job exceeds ${wall} hours and cannot spread across weeks, the answer is not on Kaggle but in the next chapter: rent a card with no session wall for the price of a lunch.`)}
+          : L(`写检查点(开销 ${ckptCost}%),这次训练被切成 ${R.sessions} 段、每段不超过 ${nf(R.perSession, 1)} 小时,跨 ${R.weeks} 周跑完。做法是固定的:训练循环把权重写进 /kaggle/working,跑完用 kaggle datasets version 把它推成一个新的数据集版本,下一个会话把这个数据集挂成输入、读出检查点接着训。${interactive ? `另外你现在是守在浏览器里跑的,每个会话大约白烧 0.8 小时配额在空转上,总共 ${nf(R.wasted, 1)} 小时——关掉它,改用 Save & Run All 后台提交,关掉浏览器去干别的。` : "并且你用的是 Save & Run All 后台提交,这是正确用法——交互会话会因为空闲被回收,还一直占着配额。"}如果这个任务超过 ${wall} 小时又不允许跨周,答案不在 Kaggle,也不在下一章的 Colab(它的会话更短更不稳),而在 PF4:花几十块钱租一张没有会话墙的卡。`,
+              `With checkpointing on (${ckptCost}% overhead) the run splits into ${R.sessions} segments of at most ${nf(R.perSession, 1)} hours and completes across ${R.weeks} weeks. The procedure is fixed: the training loop writes weights into /kaggle/working, you push that as a new dataset version with kaggle datasets version, and the next session mounts that dataset as an input, loads the checkpoint and continues. ${interactive ? `You are also sitting and watching it, burning roughly 0.8 hours of quota per session on idling — ${nf(R.wasted, 1)} hours in total. Turn that off, submit with Save & Run All instead, and close the browser.` : "You are submitting with Save & Run All, which is the correct usage — an interactive session is reclaimed when idle and holds your quota while you watch it."} If the job exceeds ${wall} hours and cannot spread across weeks, the answer is neither Kaggle nor the Colab of the next chapter, whose sessions are shorter and less predictable. It is PF4: rent a card with no session wall for the price of a lunch.`)}
       </Note>
     </div>
   );
@@ -388,7 +388,7 @@ function PlatViz() {
 
   return (
     <div>
-      <VizHead idx="PF3" title={L("把约束说清楚,平台顺序就自己出来了", "State the constraints and the ordering follows by itself")} />
+      <VizHead idx="PF4" title={L("把约束说清楚,平台顺序就自己出来了", "State the constraints and the ordering follows by itself")} />
       <div className="viz-ctrl">
         <Slider label={L("每月需要的 GPU 小时", "GPU hours needed per month")} min={2} max={200} value={hoursNeeded} onChange={setHoursNeeded} unit=" h" />
         <Slider label={L("最长的一次连续训练", "Longest single run")} min={1} max={48} value={longestRun} onChange={setLongestRun} unit=" h" />
@@ -484,7 +484,7 @@ function CostViz() {
 
   return (
     <div>
-      <VizHead idx="PF4" title={L("实验矩阵 → 算力小时 → 钱和天数", "The experiment matrix, into hours, into money and days")} />
+      <VizHead idx="PF5" title={L("实验矩阵 → 算力小时 → 钱和天数", "The experiment matrix, into hours, into money and days")} />
       <div className="viz-ctrl">
         <Slider label={L("模型族数", "Model families")} min={1} max={8} value={families} onChange={setFamilies} />
         <Slider label={L("每族超参组合数", "Hyperparameter sets each")} min={4} max={200} value={combos} onChange={setCombos} />

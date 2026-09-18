@@ -571,6 +571,131 @@ function PlanViz() {
 }
 
 /* =========================================================
+   t31 · colabLab — preemption, Drive, and Young's formula
+   ---------------------------------------------------------
+   Kaggle's wall is deterministic; Colab's is a random process.
+   That turns "how many segments" into "how often to save on a
+   machine that may die at any moment" — a question with a
+   closed-form answer, simulated here rather than asserted.
+   ========================================================= */
+function ColabViz() {
+  const L = useL();
+  const [workH, setWorkH] = React.useState(12);       // hours of pure compute
+  const [preempt, setPreempt] = React.useState(0.18); // reclaims per hour
+  const [ckptMin, setCkptMin] = React.useState(3);    // cost of writing one checkpoint
+  const [tauMin, setTauMin] = React.useState(30);     // checkpoint interval — the knob
+  const [persist, setPersist] = React.useState(true); // Drive, or the ephemeral /content
+  const [tarStaged, setTarStaged] = React.useState(false);
+
+  // Restarting costs a reconnect plus re-staging the data, because /content is
+  // wiped every time. Reading many small files straight off the Drive FUSE
+  // mount is what makes that number large.
+  const reconnectMin = 3;
+  const stageMin = tarStaged ? 2 : 12;
+  const restartMin = reconnectMin + stageMin;
+
+  const R = React.useMemo(() => {
+    const Wm = workH * 60, lamPerMin = preempt / 60;
+    // One run of the preemption process. Returns minutes elapsed, reclaims,
+    // and the compute that had to be thrown away.
+    const simulate = (tau, seed) => {
+      const rnd = rng(seed);
+      let t = 0, done = 0, lastCkpt = 0, pre = 0, wasted = 0, guard = 0;
+      while (done < Wm && guard++ < 4000) {
+        const run = Math.min(tau, Wm - done);
+        const ttf = -Math.log(Math.max(1e-12, rnd())) / lamPerMin;
+        if (ttf < run) {
+          t += ttf + restartMin;
+          // with Drive you fall back to the last checkpoint; without it, to zero
+          wasted += persist ? ttf : done + ttf;
+          done = persist ? lastCkpt : 0;
+          if (!persist) lastCkpt = 0;
+          pre++;
+        } else {
+          t += run + ckptMin;
+          done += run;
+          lastCkpt = done;
+        }
+      }
+      return { t, pre, wasted, finished: done >= Wm };
+    };
+    const mean = (tau, trials, seed0) => {
+      let t = 0, pre = 0, wasted = 0, fin = 0;
+      for (let k = 0; k < trials; k++) {
+        const r = simulate(tau, seed0 + k * 7919);
+        t += r.t; pre += r.pre; wasted += r.wasted; fin += r.finished ? 1 : 0;
+      }
+      return { wallH: t / trials / 60, pre: pre / trials, wastedH: wasted / trials / 60,
+               finishRate: fin / trials };
+    };
+
+    const cur = mean(tauMin, 140, 11);
+    // Young's formula: the interval that minimises total overhead on a machine
+    // with mean time between failures M and checkpoint cost C.
+    const mtbfMin = 60 / preempt;
+    const tauOpt = Math.sqrt(2 * ckptMin * mtbfMin);
+    const best = mean(clamp(tauOpt, 2, 600), 140, 11);
+
+    const sweep = [];
+    for (let tau = 4; tau <= 260; tau += 6) sweep.push({ x: tau, y: mean(tau, 36, 23).wallH });
+    const sweepBest = sweep.reduce((a, b) => (b.y < a.y ? b : a));
+
+    // Kaggle for reference: a deterministic 9-hour wall, one checkpoint and one
+    // restart per segment, and nothing random about it.
+    const segs = Math.max(1, Math.ceil(workH / 9));
+    const kaggleH = workH + ((segs - 1) * (ckptMin + reconnectMin)) / 60;
+
+    return { cur, best, tauOpt, sweep, sweepBest, kaggleH, mtbfMin };
+  }, [workH, preempt, ckptMin, tauMin, persist, tarStaged, restartMin]);
+
+  const eff = workH / R.cur.wallH;
+  const effBest = workH / R.best.wallH;
+  const markI = Math.round((tauMin - 4) / 6);
+
+  return (
+    <div>
+      <VizHead idx="PF3" title={L("抢占式运行时:多久存一次盘,才不会白跑", "A preemptible runtime: how often to save so the work is not thrown away")} />
+      <div className="viz-ctrl">
+        <Slider label={L("任务纯算时长", "Pure compute needed")} min={1} max={48} value={workH} onChange={setWorkH} unit=" h" />
+        <Slider label={L("每小时被回收的概率", "Reclaims per hour")} min={0.02} max={1} step={0.02} value={preempt} onChange={setPreempt} fmt={(v) => nf(v, 2)} />
+        <Slider label={L("检查点间隔", "Checkpoint interval")} min={4} max={240} step={2} value={tauMin} onChange={setTauMin} unit=" min" />
+        <Slider label={L("写一次检查点", "Cost of one checkpoint")} min={0.5} max={15} step={0.5} value={ckptMin} onChange={setCkptMin} unit=" min" />
+        <Toggle label={L("检查点写进挂载的 Drive(否则写 /content)", "Checkpoint to mounted Drive (else /content)")} value={persist} onChange={setPersist} />
+        <Toggle label={L("数据打包后复制到本地盘再解开", "Tar the dataset and unpack it on local disk")} value={tarStaged} onChange={setTarStaged} />
+      </div>
+
+      <div className="ts-kpi-grid">
+        <Kpi label={L("预计墙钟时间", "Expected wall-clock time")} value={R.cur.finishRate < 0.95 ? L("可能跑不完", "may never finish") : `${nf(R.cur.wallH, 1)} h`}
+          tone={R.cur.finishRate < 0.95 ? "warn" : eff > 0.8 ? "ok" : "warn"} hint={L(`纯算只要 ${workH} h`, `${workH} h of actual compute`)} />
+        <Kpi label={L("平均被回收", "Reclaims on average")} value={nf(R.cur.pre, 1)} unit={L(" 次", "")} tone="acc" hint={L(`平均无故障 ${nf(R.mtbfMin / 60, 1)} h`, `MTBF ${nf(R.mtbfMin / 60, 1)} h`)} />
+        <Kpi label={L("白跑掉的工作量", "Compute thrown away")} value={`${nf(R.cur.wastedH, 1)} h`} tone={R.cur.wastedH > workH * 0.25 ? "warn" : "ok"} hint={L(`效率 ${pct1(eff)}`, `efficiency ${pct1(eff)}`)} />
+        <Kpi label={L("Young 公式给的最优间隔", "Young's optimal interval")} value={`${nf(R.tauOpt, 0)} min`} tone="ok"
+          hint={L(`你现在是 ${tauMin} min`, `you are at ${tauMin} min`)} />
+      </div>
+
+      <div style={{ marginTop: 10 }}>
+        <Bar label={L("当前间隔的效率", "Efficiency at your interval")} value={eff} max={1} tone={eff > 0.8 ? "ok" : "warn"} valText={pct1(eff)} />
+        <Bar label={L("最优间隔的效率", "Efficiency at the optimum")} value={effBest} max={1} tone="ok" valText={pct1(effBest)} />
+        <Bar label={L("Kaggle(确定的 9 小时墙)", "Kaggle (a deterministic 9-hour wall)")} value={workH / R.kaggleH} max={1} tone="acc" valText={pct1(workH / R.kaggleH)} />
+      </div>
+
+      <div style={{ marginTop: 10 }}>
+        <div className="ts-cap">{L("预计墙钟时间随检查点间隔变化(虚线 = 你当前的间隔)", "Expected wall-clock time against checkpoint interval (dashed = your interval)")}</div>
+        <MiniPlot data={R.sweep} h={120} markIndex={markI} yMin={0} />
+      </div>
+
+      <Note mark="→" tone={!persist ? "bad" : Math.abs(tauMin - R.tauOpt) < R.tauOpt * 0.4 ? "on" : "bad"}>
+        {!persist
+          ? L(`检查点写在 /content 上,而 /content 在运行时被回收时连同所有中间产物一起消失——一次抢占不是退回上一个检查点,是退回零。${workH} 小时的纯算变成 ${nf(R.cur.wallH, 1)} 小时墙钟,白跑掉 ${nf(R.cur.wastedH, 1)} 小时,效率只剩 ${pct1(eff)}${R.cur.finishRate < 0.95 ? `,而且只有 ${pct1(R.cur.finishRate)} 的运行能跑到终点` : ""}。把任务时长拖到 30 小时以上,它会变成一个几乎不可能完成的任务。这正是 Colab 和 Kaggle 最根本的区别:Kaggle 的 /kaggle/working 会被保存下来,而 Colab 除了挂载的 Drive 之外什么都不保留。把开关打开,让检查点落到 Drive 上。`,
+              `The checkpoint is being written to /content, which vanishes with every intermediate artefact when the runtime is reclaimed. A preemption does not return you to the last checkpoint, it returns you to zero. ${workH} hours of compute becomes ${nf(R.cur.wallH, 1)} hours of wall clock, ${nf(R.cur.wastedH, 1)} of them thrown away, for an efficiency of ${pct1(eff)}${R.cur.finishRate < 0.95 ? `, and only ${pct1(R.cur.finishRate)} of runs reach the end at all` : ""}. Push the job past thirty hours and it becomes very nearly impossible. That is the fundamental difference from Kaggle: /kaggle/working is preserved, while Colab keeps nothing but a mounted Drive. Switch the toggle and let the checkpoint land on Drive.`)
+          : L(`平均无故障时间 ${nf(R.mtbfMin / 60, 1)} 小时,写一次检查点 ${ckptMin} 分钟,Young 公式给出的最优间隔是 √(2·C·M) = ${nf(R.tauOpt, 0)} 分钟。你现在是 ${tauMin} 分钟,效率 ${pct1(eff)},最优能到 ${pct1(effBest)}。把间隔拖到 5 分钟和拖到 240 分钟,你会看到同一条曲线的两端都变差:存得太勤,时间全花在写盘上;存得太稀,每次被回收都白跑一大段。这条 U 形曲线是抢占式算力上唯一需要你自己调的参数。${tarStaged ? "" : `另外注意重启开销:你现在每次重连都要花 ${stageMin} 分钟从 Drive 上读数据——Drive 的 FUSE 挂载在大量小文件上比本地盘慢一到两个数量级。把「数据打包后复制到本地盘」打开,这一项会降到 2 分钟。`}`,
+              `With a mean time between failures of ${nf(R.mtbfMin / 60, 1)} hours and a checkpoint costing ${ckptMin} minutes, Young's formula gives an optimal interval of √(2·C·M) = ${nf(R.tauOpt, 0)} minutes. You are at ${tauMin}, for an efficiency of ${pct1(eff)} against ${pct1(effBest)} at the optimum. Drag the interval to 5 minutes and then to 240 and both ends of the same curve get worse: save too often and the time goes into writing, save too rarely and every reclaim throws away a long stretch. That U is the one parameter preemptible compute actually asks you to tune. ${tarStaged ? "" : `Note the restart cost too: every reconnect currently spends ${stageMin} minutes reading data off Drive, whose FUSE mount is one to two orders of magnitude slower than local disk on many small files. Switch on tar-and-unpack-locally and that term falls to 2 minutes.`}`)}
+      </Note>
+    </div>
+  );
+}
+
+/* =========================================================
    registry — pages.jsx renders <Viz name={chapter.viz} />
    ========================================================= */
 const VIZ = Object.assign({},
@@ -579,7 +704,7 @@ const VIZ = Object.assign({},
   window.__TS_VIZ_3 || {},
   {
     tuneLab: TuneViz, serveLab: ServeViz, driftLab: DriftViz,
-    opsLab: OpsViz, caseLab: CaseViz, planLab: PlanViz,
+    opsLab: OpsViz, caseLab: CaseViz, planLab: PlanViz, colabLab: ColabViz,
   });
 
 function Viz({ name }) {
@@ -588,6 +713,6 @@ function Viz({ name }) {
   return <div className="ts-viz"><C /></div>;
 }
 
-window.__TS_VIZ_4 = { tuneLab: TuneViz, serveLab: ServeViz, driftLab: DriftViz, opsLab: OpsViz, caseLab: CaseViz, planLab: PlanViz };
+window.__TS_VIZ_4 = { tuneLab: TuneViz, serveLab: ServeViz, driftLab: DriftViz, opsLab: OpsViz, caseLab: CaseViz, planLab: PlanViz, colabLab: ColabViz };
 window.VIZ = VIZ;
 window.Viz = Viz;
