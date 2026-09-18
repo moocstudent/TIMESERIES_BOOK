@@ -406,7 +406,7 @@ function CaseViz() {
   const [shave, setShave] = React.useState(140);          // kW removable by staggering
   const [falseCost, setFalseCost] = React.useState(800); // cost of a shave that was not needed
   const [rate, setRate] = React.useState(42);            // yuan per kW of billed demand
-  const [sysCost, setSysCost] = React.useState(52000);   // one-off build cost
+  const [sysCost, setSysCost] = React.useState(32000);   // one-off build cost
 
   const R = React.useMemo(() => {
     const days = 30, S = synth({ days, seed: 107, noise: 1.05, shift: 1.15 });
